@@ -48,10 +48,20 @@ for product in products:
     price = None
     try:
         if site.lower() == "amazon":
-            price_elem = WebDriverWait(driver, 15).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "span.a-price-whole"))
-            )
-            price = float(price_elem.text.replace(",", "").strip())
+            price_elem = None
+            try:
+                price_elem = WebDriverWait(driver, 15).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "span.a-price-whole"))
+                )
+            except:
+                try:
+                    price_elem = driver.find_element(By.CSS_SELECTOR, "#priceblock_ourprice")
+                except:
+                    price_elem = driver.find_element(By.CSS_SELECTOR, "#priceblock_dealprice")
+            
+            if price_elem:
+                price_text = price_elem.text.replace(",", "").replace("₹", "").strip()
+                price = float(price_text)
         elif site.lower() == "flipkart":
             try:
                 close_btn = driver.find_element(By.CSS_SELECTOR, "button._2KpZ6l._2doB4z")
