@@ -48,20 +48,28 @@ for product in products:
     price = None
     try:
         if site.lower() == "amazon":
-            price_elem = None
-            try:
-                price_elem = WebDriverWait(driver, 15).until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, "span.a-price-whole"))
-                )
-            except:
+            price = None
+            selectors = [
+                "span.a-price-whole",  # Common case
+                "#priceblock_ourprice",  # Standard price
+                "#priceblock_dealprice",  # Deal price
+                "#priceblock_saleprice"  # Sale price
+            ]
+
+            for sel in selectors:
                 try:
-                    price_elem = driver.find_element(By.CSS_SELECTOR, "#priceblock_ourprice")
+                    elem = WebDriverWait(driver, 10).until(
+                        EC.presence_of_element_located((By.CSS_SELECTOR, sel))
+                    )
+                    price_text = elem.text.replace("₹", "").replace(",", "").strip()
+                    if price_text:  # check it's not empty
+                        price = float(price_text)
+                        break
                 except:
-                    price_elem = driver.find_element(By.CSS_SELECTOR, "#priceblock_dealprice")
-            
-            if price_elem:
-                price_text = price_elem.text.replace(",", "").replace("₹", "").strip()
-                price = float(price_text)
+                    continue
+
+            if not price:
+                print(f"❌ Could not fetch price for Amazon: no selector matched")
         elif site.lower() == "flipkart":
             try:
                 close_btn = driver.find_element(By.CSS_SELECTOR, "button._2KpZ6l._2doB4z")
