@@ -14,6 +14,9 @@ AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
 FROM_WHATSAPP = os.environ.get("TWILIO_FROM")
 TO_WHATSAPP = os.environ.get("TWILIO_TO")
 
+if not all([ACCOUNT_SID, AUTH_TOKEN, FROM_WHATSAPP, TO_WHATSAPP]):
+    raise ValueError("Twilio credentials are missing!")
+
 client = Client(ACCOUNT_SID, AUTH_TOKEN)
 
 def send_whatsapp(site, url, price, target):
